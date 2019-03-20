@@ -1,7 +1,7 @@
 import {Router} from '../common/router'
 import * as restify from 'restify'
 import {User} from './users.model'
-import { response } from 'spdy';
+import {NotFoundError} from 'restify-errors';
 
 class UsersRouter extends Router {
 
@@ -32,7 +32,7 @@ class UsersRouter extends Router {
             if (result.n){
              return User.findById(req.params.id)
             }else{
-             res.send(404)
+             throw new NotFoundError('Documento não encontrado')
             }
           }).then(this.render(res,next)).catch(next)
     })
@@ -42,7 +42,10 @@ class UsersRouter extends Router {
     })
     application.del('/users/:id',(req,res,next)=>{
       User.remove({_id:req.params.id}).exec().then(resultDel =>{
-        (resultDel.n)? res.send(204):res.send(404)
+        if (resultDel.n){res.send(204)
+        }else{ 
+          throw new NotFoundError('Documento não encontrado')
+        }
         return next()
       }).catch(next)
     })
